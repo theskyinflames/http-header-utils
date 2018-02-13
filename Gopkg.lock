@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/Unknwon/goconfig"
+  packages = ["."]
+  revision = "87a46d97951ee1ea20ed3b24c25646a79e87ba5d"
+
+[[projects]]
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
   revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
@@ -82,7 +88,7 @@
 [[projects]]
   branch = "master"
   name = "github.com/theskyinflames/go-misc"
-  packages = ["com.theskyinflames.go.misc/lib_gc_configurable_from_env","com.theskyinflames.go.misc/lib_gc_event_from_env","com.theskyinflames.go.misc/lib_gc_util"]
+  packages = ["com.theskyinflames.go.misc/lib_gc_conf","com.theskyinflames.go.misc/lib_gc_config","com.theskyinflames.go.misc/lib_gc_configurable_from_env","com.theskyinflames.go.misc/lib_gc_event_from_env","com.theskyinflames.go.misc/lib_gc_event_publisher","com.theskyinflames.go.misc/lib_gc_log","com.theskyinflames.go.misc/lib_gc_util"]
   revision = "86b277327b1cc2516690b26eccf9c2af1f477f23"
 
 [[projects]]
@@ -106,6 +112,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5bdbe6902a08c39f85f2b1d8efdd6cbcfa6a5a547ea3c155cac8e6121a2eb3cd"
+  inputs-digest = "cd975e69c919ede34e107e33d9b7e8d8dd4e23e6151a47825a720768429cb649"
   solver-name = "gps-cdcl"
   solver-version = 1

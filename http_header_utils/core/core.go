@@ -3,14 +3,16 @@ package core
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/theskyinflames/go-misc/com.theskyinflames.go.misc/lib_gc_event_from_env"
+	"github.com/theskyinflames/http_handler_utils/http_header_utils/configuration"
 )
+
+// For compilation purposes
+var Dummy struct{}
 
 const (
 	HTTP_HEADER_PROTOCOL_ACCEPT   = "Accept"
@@ -20,13 +22,7 @@ const (
 
 func checkForHttpMethod(method string, r *http.Request, w http.ResponseWriter) error {
 	if r.Method != method {
-		if msg, err := lib_gc_event_from_env.GetMessageFromEnvTemplate(util.ENV_MESSAGES_PREFIX, "HTTPHEDAERUTILS_001", []string{method, r.Method}); err != nil {
-			lib_event_publisher.EventPublisherChannel <- err.Error()
-			return err
-		} else {
-			lib_event_publisher.EventPublisherChannel <- msg
-			return errors.New(msg)
-		}
+		return configuration.PublishEventMessage("HTTPHEDAERUTILS_001", method)
 	} else {
 		return nil
 	}
@@ -35,30 +31,20 @@ func checkForHttpMethod(method string, r *http.Request, w http.ResponseWriter) e
 func checkForHttpProtocol(requiredProtocol string, r *http.Request) (string, error) {
 
 	protocol := ""
-	if protocol = r.Header.Get(util.HTTP_HEADER_PROTOCOL_ACCEPT); protocol == "" {
-		param := []string{}
-		if msg, err := lib_gc_event_from_env.GetMessageFromEnvTemplate(util.ENV_MESSAGES_PREFIX, "HTTPHEDAERUTILS_002", param); err != nil {
-			return "", err
-		} else {
-			return "", errors.New(msg)
-		}
+	if protocol = r.Header.Get(HTTP_HEADER_PROTOCOL_ACCEPT); protocol == "" {
+		return "", configuration.PublishEventMessage("HTTPHEDAERUTILS_002")
 	}
 
-	if strings.Contains(protocol, util.HTTP_HEADER_PROTOCOL_JSON) {
-		protocol = util.HTTP_HEADER_PROTOCOL_JSON
-	} else if strings.Contains(protocol, util.HTTP_HEADER_PROTOCOL_PROTOBUF) {
-		protocol = util.HTTP_HEADER_PROTOCOL_PROTOBUF
+	if strings.Contains(protocol, HTTP_HEADER_PROTOCOL_JSON) {
+		protocol = HTTP_HEADER_PROTOCOL_JSON
+	} else if strings.Contains(protocol, HTTP_HEADER_PROTOCOL_PROTOBUF) {
+		protocol = HTTP_HEADER_PROTOCOL_PROTOBUF
 	} else {
-		param := []string{protocol}
-		if msg, err := lib_gc_event_from_env.GetMessageFromEnvTemplate(util.ENV_MESSAGES_PREFIX, "HTTPHEDAERUTILS_003", param); err != nil {
-			return "", err
-		} else {
-			return "", errors.New(msg)
-		}
+		return "", configuration.PublishEventMessage("HTTPHEDAERUTILS_003", protocol)
 	}
 
 	if protocol != requiredProtocol {
-		return "", util.PublishEventMessage("100_009", protocol)
+		return "", configuration.PublishEventMessage("HTTPHEDAERUTILS_004", protocol)
 	} else {
 		return protocol, nil
 	}
@@ -67,7 +53,7 @@ func checkForHttpProtocol(requiredProtocol string, r *http.Request) (string, err
 // The parameter rq_obj is a pointer to the request object whitch the request will be binded to
 func getRequestBinded(protocol, rq_obj interface{}, r *http.Request) (interface{}, error) {
 	var err error
-	if protocol == util.HTTP_HEADER_PROTOCOL_JSON {
+	if protocol == HTTP_HEADER_PROTOCOL_JSON {
 		if err = json.NewDecoder(r.Body).Decode(rq_obj); err != nil {
 			return nil, err
 		}
@@ -84,20 +70,20 @@ func getRequestBinded(protocol, rq_obj interface{}, r *http.Request) (interface{
 func returnOK(w http.ResponseWriter, res interface{}, protocol string) error {
 
 	// Serialize the response
-	if protocol == util.HTTP_HEADER_PROTOCOL_PROTOBUF {
+	if protocol == HTTP_HEADER_PROTOCOL_PROTOBUF {
 		if _b, err := proto.Marshal(res.(proto.Message)); err != nil {
 			returnError(w, res, err, protocol)
 		} else {
-			w.Header().Set("Content-type", util.HTTP_HEADER_PROTOCOL_PROTOBUF)
+			w.Header().Set("Content-type", HTTP_HEADER_PROTOCOL_PROTOBUF)
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(_b))
 		}
-	} else if protocol == util.HTTP_HEADER_PROTOCOL_JSON {
+	} else if protocol == HTTP_HEADER_PROTOCOL_JSON {
 
 		if _b, err := json.Marshal(res); err != nil {
 			returnError(w, res, err, protocol)
 		} else {
-			w.Header().Set("Content-Type", util.HTTP_HEADER_PROTOCOL_JSON)
+			w.Header().Set("Content-Type", HTTP_HEADER_PROTOCOL_JSON)
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(_b))
 		}
@@ -107,30 +93,21 @@ func returnOK(w http.ResponseWriter, res interface{}, protocol string) error {
 }
 
 func returnError(w http.ResponseWriter, res interface{}, _err error, protocol string) error {
-	lib_event_publisher.EventPublisherChannel <- _err.Error()
 
-	if protocol == util.HTTP_HEADER_PROTOCOL_PROTOBUF {
+	if protocol == HTTP_HEADER_PROTOCOL_PROTOBUF {
 		if _b, err := proto.Marshal(res.(proto.Message)); err != nil {
-			if msg, err := lib_gc_event_from_env.GetMessageFromEnvTemplate(util.ENV_MESSAGES_PREFIX, "HTTPHEDAERUTILS_004", []string{err.Error()}); err != nil {
-				lib_event_publisher.EventPublisherChannel <- err.Error()
-			} else {
-				lib_event_publisher.EventPublisherChannel <- msg
-			}
+			return configuration.PublishEventMessage("HTTPHEDAERUTILS_005", err.Error())
 		} else {
-			w.Header().Set("Content-type", util.HTTP_HEADER_PROTOCOL_PROTOBUF)
+			w.Header().Set("Content-type", HTTP_HEADER_PROTOCOL_PROTOBUF)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(_b))
 		}
-	} else if protocol == util.HTTP_HEADER_PROTOCOL_JSON {
+	} else if protocol == HTTP_HEADER_PROTOCOL_JSON {
 
 		if _b, err := json.Marshal(res); err != nil {
-			if msg, err := lib_gc_event_from_env.GetMessageFromEnvTemplate(util.ENV_MESSAGES_PREFIX, "HTTPHEDAERUTILS_005", []string{err.Error()}); err != nil {
-				lib_event_publisher.EventPublisherChannel <- err.Error()
-			} else {
-				lib_event_publisher.EventPublisherChannel <- msg
-			}
+			return configuration.PublishEventMessage("HTTPHEDAERUTILS_004", err.Error())
 		} else {
-			w.Header().Set("Content-Type", util.HTTP_HEADER_PROTOCOL_JSON)
+			w.Header().Set("Content-Type", HTTP_HEADER_PROTOCOL_JSON)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(_b))
 		}
@@ -142,13 +119,4 @@ func returnError(w http.ResponseWriter, res interface{}, _err error, protocol st
 	}
 
 	return nil
-}
-
-func unmarshalErrorRs(marshaled string) (*mdhconsolecomparator.ErrorResponse, error) {
-	var errorRs mdhconsolecomparator.ErrorResponse
-	if err := json.Unmarshal([]byte(marshaled), &errorRs); err != nil {
-		return nil, err
-	} else {
-		return &errorRs, nil
-	}
 }

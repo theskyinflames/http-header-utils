@@ -1,6 +1,10 @@
 package configuration
 
 import (
+	"errors"
+
+	"github.com/theskyinflames/go-misc/com.theskyinflames.go.misc/lib_gc_event_from_env"
+	"github.com/theskyinflames/go-misc/com.theskyinflames.go.misc/lib_gc_event_publisher"
 	UTIL "github.com/theskyinflames/go-misc/com.theskyinflames.go.misc/lib_gc_util"
 )
 
@@ -23,3 +27,13 @@ func init() {
 // See github.com/theskyinflames/go-misc/com.theskyinflames.go.misc/lib_gc_event_from_env
 // For more detail
 var ENV_MESSAGES_PREFIX string
+
+func PublishEventMessage(code string, params ...string) error {
+	if msg, err := lib_gc_event_from_env.GetMessageFromEnvTemplate(ENV_MESSAGES_PREFIX, code, params); err != nil {
+		lib_gc_event_publisher.EventPublisherChannel <- err.Error()
+		return err
+	} else {
+		lib_gc_event_publisher.EventPublisherChannel <- msg
+		return errors.New(msg)
+	}
+}
