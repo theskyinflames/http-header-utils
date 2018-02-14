@@ -20,7 +20,8 @@ const (
 	HTTP_HEADER_PROTOCOL_PROTOBUF = "application/x-protobuf"
 )
 
-func checkForHttpMethod(method string, r *http.Request, w http.ResponseWriter) error {
+// It validates that the incoming method is the expected one
+func checkForHttpMethod(method string, r *http.Request) error {
 	if r.Method != method {
 		return configuration.PublishEventMessage("HTTPHEDAERUTILS_001", method)
 	} else {
@@ -28,6 +29,10 @@ func checkForHttpMethod(method string, r *http.Request, w http.ResponseWriter) e
 	}
 }
 
+// It checks for an incomming header "Accept" filled whith the required
+// protocol: "application/json" or "application/x-protobuf". If the header
+// does not exists, it will result an error. If exist, que rq protocol is
+// set from its value.
 func checkForHttpProtocol(requiredProtocol string, r *http.Request) (string, error) {
 
 	protocol := ""
@@ -67,6 +72,7 @@ func getRequestBinded(protocol, rq_obj interface{}, r *http.Request) (interface{
 	return rq_obj, nil
 }
 
+// It returns an OK response
 func returnOK(w http.ResponseWriter, res interface{}, protocol string) error {
 
 	// Serialize the response
@@ -92,6 +98,7 @@ func returnOK(w http.ResponseWriter, res interface{}, protocol string) error {
 	return nil
 }
 
+// It returns an ERROR response
 func returnError(w http.ResponseWriter, res interface{}, _err error, protocol string) error {
 
 	if protocol == HTTP_HEADER_PROTOCOL_PROTOBUF {
