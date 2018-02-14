@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	_ENV_MESSAGES_PREFIX := &UTIL.EnvironmentVariable{Var_name: "GO_ENV_MESSAGES_PREFIX", Var_type: UTIL.ENVIRONMENT_VARIABLE_TYPE_STRING}
+	_ENV_MESSAGES_PREFIX := &UTIL.EnvironmentVariable{Var_name: "GO_HTTPHANDLERUTILS_PREFIX", Var_type: UTIL.ENVIRONMENT_VARIABLE_TYPE_STRING}
 	evs := []*UTIL.EnvironmentVariable{_ENV_MESSAGES_PREFIX}
 	if _, err := UTIL.GetEnvironmentVariables(evs); err != nil {
 		panic(err)
