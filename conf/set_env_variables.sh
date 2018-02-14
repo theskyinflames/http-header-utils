@@ -1,0 +1,3 @@
+#!/bin/bash
+
+export GO_ENV_MESSAGES_PREFIX=${GO_ENV_MESSAGES_PREFIX:"GO_APP"}

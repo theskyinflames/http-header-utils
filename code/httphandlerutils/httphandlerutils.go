@@ -105,7 +105,7 @@ func returnError(w http.ResponseWriter, res interface{}, _err error, protocol st
 	} else if protocol == HTTP_HEADER_PROTOCOL_JSON {
 
 		if _b, err := json.Marshal(res); err != nil {
-			return configuration.PublishEventMessage("HTTPHEDAERUTILS_004", err.Error())
+			return configuration.PublishEventMessage("HTTPHEDAERUTILS_006", err.Error())
 		} else {
 			w.Header().Set("Content-Type", HTTP_HEADER_PROTOCOL_JSON)
 			w.WriteHeader(http.StatusInternalServerError)
