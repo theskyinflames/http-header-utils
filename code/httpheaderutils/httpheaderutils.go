@@ -1,4 +1,4 @@
-package httphandlerutils
+package httpheaderutils
 
 import (
 	"bytes"
