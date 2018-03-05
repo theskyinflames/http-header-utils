@@ -21,7 +21,7 @@ const (
 )
 
 // It validates that the incoming method is the expected one
-func checkForHttpMethod(method string, r *http.Request) error {
+func CheckForHttpMethod(method string, r *http.Request) error {
 	if r.Method != method {
 		return configuration.PublishEventMessage("HTTPHEDAERUTILS_001", method)
 	} else {
@@ -33,7 +33,7 @@ func checkForHttpMethod(method string, r *http.Request) error {
 // protocol: "application/json" or "application/x-protobuf". If the header
 // does not exists, it will result an error. If exist, que rq protocol is
 // set from its value.
-func checkForHttpProtocol(requiredProtocol string, r *http.Request) (string, error) {
+func CheckForHttpProtocol(requiredProtocol string, r *http.Request) (string, error) {
 
 	protocol := ""
 	if protocol = r.Header.Get(HTTP_HEADER_PROTOCOL_ACCEPT); protocol == "" {
@@ -56,7 +56,7 @@ func checkForHttpProtocol(requiredProtocol string, r *http.Request) (string, err
 }
 
 // The parameter rq_obj is a pointer to the request object whitch the request will be binded to
-func getRequestBinded(protocol, rq_obj interface{}, r *http.Request) (interface{}, error) {
+func GetRequestBinded(protocol, rq_obj interface{}, r *http.Request) (interface{}, error) {
 	var err error
 	if protocol == HTTP_HEADER_PROTOCOL_JSON {
 		if err = json.NewDecoder(r.Body).Decode(rq_obj); err != nil {
@@ -73,12 +73,12 @@ func getRequestBinded(protocol, rq_obj interface{}, r *http.Request) (interface{
 }
 
 // It returns an OK response
-func returnOK(w http.ResponseWriter, res interface{}, protocol string) error {
+func ReturnOK(w http.ResponseWriter, res interface{}, protocol string) error {
 
 	// Serialize the response
 	if protocol == HTTP_HEADER_PROTOCOL_PROTOBUF {
 		if _b, err := proto.Marshal(res.(proto.Message)); err != nil {
-			returnError(w, res, err, protocol)
+			ReturnError(w, res, err, protocol)
 		} else {
 			w.Header().Set("Content-type", HTTP_HEADER_PROTOCOL_PROTOBUF)
 			w.WriteHeader(http.StatusOK)
@@ -87,7 +87,7 @@ func returnOK(w http.ResponseWriter, res interface{}, protocol string) error {
 	} else if protocol == HTTP_HEADER_PROTOCOL_JSON {
 
 		if _b, err := json.Marshal(res); err != nil {
-			returnError(w, res, err, protocol)
+			ReturnError(w, res, err, protocol)
 		} else {
 			w.Header().Set("Content-Type", HTTP_HEADER_PROTOCOL_JSON)
 			w.WriteHeader(http.StatusOK)
@@ -99,7 +99,7 @@ func returnOK(w http.ResponseWriter, res interface{}, protocol string) error {
 }
 
 // It returns an ERROR response
-func returnError(w http.ResponseWriter, res interface{}, _err error, protocol string) error {
+func ReturnError(w http.ResponseWriter, res interface{}, _err error, protocol string) error {
 
 	if protocol == HTTP_HEADER_PROTOCOL_PROTOBUF {
 		if _b, err := proto.Marshal(res.(proto.Message)); err != nil {
