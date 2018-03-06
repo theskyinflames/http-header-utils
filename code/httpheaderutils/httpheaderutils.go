@@ -23,7 +23,7 @@ const (
 // It validates that the incoming method is the expected one
 func CheckForHttpMethod(method string, r *http.Request) error {
 	if r.Method != method {
-		return configuration.PublishEventMessage("HTTPHEDAERUTILS_001", method)
+		return configuration.PublishEventMessage("100_001", method)
 	} else {
 		return nil
 	}
@@ -37,7 +37,7 @@ func CheckForHttpProtocol(requiredProtocol string, r *http.Request) (string, err
 
 	protocol := ""
 	if protocol = r.Header.Get(HTTP_HEADER_PROTOCOL_ACCEPT); protocol == "" {
-		return "", configuration.PublishEventMessage("HTTPHEDAERUTILS_002")
+		return "", configuration.PublishEventMessage("100_002")
 	}
 
 	if strings.Contains(protocol, HTTP_HEADER_PROTOCOL_JSON) {
@@ -45,11 +45,11 @@ func CheckForHttpProtocol(requiredProtocol string, r *http.Request) (string, err
 	} else if strings.Contains(protocol, HTTP_HEADER_PROTOCOL_PROTOBUF) {
 		protocol = HTTP_HEADER_PROTOCOL_PROTOBUF
 	} else {
-		return "", configuration.PublishEventMessage("HTTPHEDAERUTILS_003", protocol)
+		return "", configuration.PublishEventMessage("100_003", protocol)
 	}
 
 	if protocol != requiredProtocol {
-		return "", configuration.PublishEventMessage("HTTPHEDAERUTILS_004", protocol)
+		return "", configuration.PublishEventMessage("100_004", protocol)
 	} else {
 		return protocol, nil
 	}
@@ -103,7 +103,7 @@ func ReturnError(w http.ResponseWriter, res interface{}, _err error, protocol st
 
 	if protocol == HTTP_HEADER_PROTOCOL_PROTOBUF {
 		if _b, err := proto.Marshal(res.(proto.Message)); err != nil {
-			return configuration.PublishEventMessage("HTTPHEDAERUTILS_005", err.Error())
+			return configuration.PublishEventMessage("100_005", err.Error())
 		} else {
 			w.Header().Set("Content-type", HTTP_HEADER_PROTOCOL_PROTOBUF)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -112,7 +112,7 @@ func ReturnError(w http.ResponseWriter, res interface{}, _err error, protocol st
 	} else if protocol == HTTP_HEADER_PROTOCOL_JSON {
 
 		if _b, err := json.Marshal(res); err != nil {
-			return configuration.PublishEventMessage("HTTPHEDAERUTILS_006", err.Error())
+			return configuration.PublishEventMessage("100_006", err.Error())
 		} else {
 			w.Header().Set("Content-Type", HTTP_HEADER_PROTOCOL_JSON)
 			w.WriteHeader(http.StatusInternalServerError)
