@@ -122,7 +122,7 @@ func ReturnError(w http.ResponseWriter, res interface{}, _err error, protocol st
 
 		// HTTP protocol not supported
 		w.WriteHeader(http.StatusInternalServerError)
-		http.Error(w, fmt.Sprintf("HTTP protocol [%s] not supported ", protocol), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("HTTP header Accept [%s] does not specified, or the one specifiec is not supported !! ", protocol), http.StatusInternalServerError)
 	}
 
 	return nil
